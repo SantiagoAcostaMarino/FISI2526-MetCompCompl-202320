@@ -10,15 +10,15 @@ import matplotlib.pyplot as plt
 
 # %%
 class Mineral:
-    def init(self,nombre,dureza,ilustre,rompimiento_por_fractura,color,composicion,sistema_cristalino,specific_gravity):
-        self.nombre=nombre
-        self.dureza=dureza
-        self.ilustre=ilustre
-        self.rompimiento_por_fractura=rompimiento_por_fractura
-        self.color=color
-        self.composicion=composicion
-        self.sistema_cristalino=sistema_cristalino
-        self.specific_gravity=specific_gravity
+    def __init__(self, nombre, dureza, rompimiento_por_fractura, color, composicion, lustre, specific_gravity, sistema_cristalino):
+        self.nombre = nombre
+        self.dureza = dureza
+        self.rompimiento_por_fractura = rompimiento_por_fractura
+        self.color = color
+        self.composicion = composicion
+        self.lustre = lustre
+        self.specific_gravity = specific_gravity
+        self.sistema_cristalino = sistema_cristalino
     
     def silicato(self):
         if "Si" in self.composicion and "O" in self.composicion:
