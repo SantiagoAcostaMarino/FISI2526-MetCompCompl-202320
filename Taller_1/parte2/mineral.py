@@ -4,7 +4,7 @@
 
 # CLASE MINERAL
 
-
+import matplotlib.pyplot as plt
 class Mineral:
     def __init__(self, nombre, dureza, rompimiento_por_fractura, color, composicion, lustre, specific_gravity, sistema_cristalino):
         self.nombre = nombre
@@ -29,12 +29,12 @@ class Mineral:
     def mostrar_color(self):
        
 
-     # Crear una figura y un eje
+     
         fig, ax = plt.subplots()
 
         # Establecer el color de fondo
         ax.set_facecolor(self.color)
-        ax.set_title('Color más frecuente de'+self.nombre)
+        ax.set_title('Color más frecuente de '+self.nombre)
         plt.show()
     def impresion_(self):
         if self.rompimiento_por_fractura==False:
