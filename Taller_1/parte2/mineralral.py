@@ -2,12 +2,6 @@
 # Parte 2 taller
 
 
-
-import numpy as np
-import matplotlib.pyplot as plt
-
-
-
 # CLASE MINERAL
 
 
@@ -31,7 +25,7 @@ class Mineral:
         return silicato
     def calcular_densidad_(self):
         densidad= float(self.specific_gravity)*997
-        return densidad+"kg/m^3"
+        return densidad
     def mostrar_color(self):
        
 
