@@ -28,9 +28,6 @@ def calcular_densidad_promedio(minerales_array):
         densidad_promedio=densidad_total/len(minerales_array)
     return(round(densidad_promedio,2))
 
-a= crear_objetos()
-for mineral in a:   
-    Mineral.mostrar_color(mineral)
 
     
 
