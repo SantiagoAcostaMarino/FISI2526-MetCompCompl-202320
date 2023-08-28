@@ -1,7 +1,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mineralral import Mineral 
+from mineral import Mineral 
 
 def crear_objetos():
     with open('minerales.txt', 'r', encoding='utf-8' ) as fichero:
@@ -26,7 +26,7 @@ def calcular_densidad_promedio(minerales_array):
     for mineral in minerales_array:
         densidad_total+= mineral.calcular_densidad_()
         densidad_promedio=densidad_total/len(minerales_array)
-    print (round(densidad_promedio,2))
+    return(round(densidad_promedio,2))
 
 
 
