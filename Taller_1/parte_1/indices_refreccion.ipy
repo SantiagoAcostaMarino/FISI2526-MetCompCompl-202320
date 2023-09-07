@@ -1,0 +1,32 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import yaml
+
+def procesar_archivo_yml(ruta_archivo):
+    resultados = []
+
+    with open(ruta_archivo, 'r') as archivo:
+        contenido = archivo.read()
+
+        # Buscar el inicio de la sección de datos
+        inicio_datos = contenido.find("data: |")
+        if inicio_datos != -1:
+            inicio_datos += len("data: |")
+            datos = contenido[inicio_datos:]
+
+            # Separar las líneas de datos y procesarlas
+            lineas = datos.splitlines()
+            for linea in lineas:
+                valores = linea.split()
+                if len(valores) == 2:
+                    lambda_i = float(valores[0])
+                    n_i = float(valores[1])
+                    resultados.append((lambda_i, n_i))
+
+    return resultados
+
+# Ejemplo de uso:
+ruta_archivo_yml = "archivo.yml"
+resultados = procesar_archivo_yml(ruta_archivo_yml)
+for lambda_i, n_i in resultados:
+    print(f"Longitud de onda: {lambda_i}, Índice de refracción: {n_i}")
