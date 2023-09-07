@@ -1,0 +1,187 @@
+
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+
+def func_archivoyml_tuplas_2 (ruta_yml: str) -> list:
+    '''
+     Lee los archivos yml y devuelve la lista de tuplas
+    '''
+    f = open(ruta_yml)
+    texto_archivo = f.read() #text_archivo es un string de todo lo que contiene el archivo
+    f.close()
+
+    # A continuación, note que el texto lo separamos por data: |\n, así como en \nSPECS y - type.
+    # Si bien no todos los archivos tienen estos dos últimos strings de terminación, se pueden incluir
+    # para buscar el caso más generla
+    lista_unprocessed = texto_archivo.split('data: |\n')[1].split('\nSPECS')[0].split('  - type')[0].strip().split('\n        ')
+    
+    # Acá si gustan pueden darle un print a lista_unprocessed para ver el resultado
+    lista_final = []
+
+    for k in lista_unprocessed:
+        texto = k.split(' ')
+        texto[0] = float(texto[0])
+        texto[1] = float(texto[1])
+        lista_final.append(tuple(texto))
+
+    return lista_final
+
+
+
+
+
+
+def func_archivoyml_tuplas(ruta_yml: str) -> list:
+    '''
+    Lee los archivos yml y devuelve la lista de tuplas
+    '''
+    
+    f = open(ruta_yml)
+    texto_archivo = f.read() #text_archivo es un string de todo lo que contiene el archivo
+    f.close()
+    
+    # Separar el texto por 'data: |' y tomar la primera parte
+    lista_unprocessed = texto_archivo.split('data: |')[1].strip()
+
+    # Separar las líneas del texto
+    lineas = lista_unprocessed.split('\n')
+
+    lista_final = []
+
+    for linea in lineas:
+        # Separar cada línea en dos partes: longitud de onda y índice de refracción
+        partes = linea.strip().split()
+        if len(partes) == 2:
+            # Convertir las partes a números flotantes
+            lambda_i = float(partes[0])
+            ni = float(partes[1])
+            tupla = (lambda_i, ni)
+            lista_final.append(tupla)
+
+    return lista_final
+    
+
+
+# PUNTO 1 #
+
+def tuplas_yml(file_path):
+    
+    with open(file_path, 'r') as file:
+        yml_content = file.read()
+        
+        # Encontrar el inicio y fin de la sección de datos
+        start_index = yml_content.find("data: |")
+        end_index = yml_content.find("SPECS", start_index)
+        data_section = yml_content[start_index:end_index].strip()
+        
+
+        # Extraer las tuplas (λi, ni) del texto
+        data_tuples = []
+        
+        data_lines = data_section.split("\n")
+        
+        for line in data_lines[1:]:  # Saltar el primer elemento en blanco
+            parts = line.strip().split()
+            parts_list = list(parts)
+            
+            if len(parts) == 2:
+                wavelength = float(parts_list[0])
+                refractive_index = float(parts_list[1])
+                data_tuples.append((wavelength, refractive_index))
+                
+        return data_tuples
+
+
+
+data_tuples = tuplas_yml(r"C:\Users\rigod\Documents\MetodosI_RigoArias_SebastianQuiroga\archivos_yml\Adhesivos Ópticos\NOA1348.yml")
+
+
+def mean(data_tuples):
+    
+    first_values = [ ]
+    
+    for tuple in data_tuples:
+        
+        first_values.append(tuple[1])
+        
+    return sum(first_values) / len(first_values)
+
+
+def s_deviation(data_tuples):
+    
+    first_values = []
+    
+    for tuple in data_tuples:
+        
+        first_values.append(tuple[0])
+        mean = sum(first_values) / len(first_values)
+        squared_differences = [(x - mean)**2 for x in first_values]
+        variance = sum(squared_differences) / (len(first_values))
+        
+    return np.sqrt(variance)
+
+
+def refractive_index_graph(data_tuples, material):
+    
+    wavelength = [tupla[0] for tupla in data_tuples]
+    refractive_index = [tupla[1] for tupla in data_tuples]
+    refractive_index_mean = mean(data_tuples)
+    refractive_index_s_deviation  = s_deviation(data_tuples)
+    plt.figure(figsize=(10, 8))
+
+    plt.title(f"Indice de refraccion de {material}, n promedio = {refractive_index_mean}, desviacion estandar = {refractive_index_s_deviation} ")
+
+    plt.xlabel("Longitud de onda (nm)")
+    plt.ylabel("Índice de refracción")
+
+    plt.plot(wavelength, refractive_index)
+
+    plt.grid(True)
+
+    plt.show()
+    
+print(refractive_index_graph(data_tuples, 'NOA1348'))
+
+
+#def files_names(carpeta):
+
+
+
+#archivos = files_names(r"C:\Users\rigod\Documents\MetodosI_RigoArias_SebastianQuiroga\archivos_yml")
+
+def save_graph(data_tuples, material, dir_path):
+    
+    wavelength = [tupla[0] for tupla in data_tuples]
+    refractive_index = [tupla[1] for tupla in data_tuples]
+    refractive_index_mean = mean(data_tuples)
+    refractive_index_s_deviation = stdev(data_tuples)
+
+    plt.figure(figsize=(10, 8))
+
+    plt.title(f"Índice de refracción de {material}, n promedio = {refractive_index_mean}, desviación estándar = {refractive_index_s_deviation}")
+
+    plt.xlabel("Longitud de onda (nm)")
+    plt.ylabel("Índice de refracción")
+
+    plt.plot(wavelength, refractive_index)
+
+    plt.grid(True)
+
+    plt.savefig(os.path.join(dir_path, f"{material}.png"))
+
+def main(pathh):
+    # Obtener la lista de archivos
+    files = files_names(pathh)
+
+    # Procesar cada archivo
+    for file in files:
+        
+        # Obtener los datos del archivo
+        data_tuples = tuplas_yml(os.path.join(pathh, file))
+
+        # Guardar la gráfica
+        save_graph(data_tuples, file, os.path.join(pathh, os.path.dirname(file)))
+
+main(r"C:\Users\rigod\Documents\MetodosI_RigoArias_SebastianQuiroga\archivos_yml")
+# PUNTO 2 #
