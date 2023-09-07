@@ -1,32 +1,67 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import yaml
 
-def procesar_archivo_yml(ruta_archivo):
-    resultados = []
 
-    with open(ruta_archivo, 'r') as archivo:
-        contenido = archivo.read()
 
-        # Buscar el inicio de la sección de datos
-        inicio_datos = contenido.find("data: |")
-        if inicio_datos != -1:
-            inicio_datos += len("data: |")
-            datos = contenido[inicio_datos:]
+def func_archivoyml_tuplas_2 (ruta_yml: str) -> list:
+    '''
+     Lee los archivos yml y devuelve la lista de tuplas
+    '''
+    f = open(ruta_yml)
+    texto_archivo = f.read() #text_archivo es un string de todo lo que contiene el archivo
+    f.close()
 
-            # Separar las líneas de datos y procesarlas
-            lineas = datos.splitlines()
-            for linea in lineas:
-                valores = linea.split()
-                if len(valores) == 2:
-                    lambda_i = float(valores[0])
-                    n_i = float(valores[1])
-                    resultados.append((lambda_i, n_i))
+    # A continuación, note que el texto lo separamos por data: |\n, así como en \nSPECS y - type.
+    # Si bien no todos los archivos tienen estos dos últimos strings de terminación, se pueden incluir
+    # para buscar el caso más generla
+    lista_unprocessed = texto_archivo.split('data: |\n')[1].split('\nSPECS')[0].split('  - type')[0].strip().split('\n        ')
+    
+    # Acá si gustan pueden darle un print a lista_unprocessed para ver el resultado
+    lista_final = []
 
-    return resultados
+    for k in lista_unprocessed:
+        texto = k.split(' ')
+        texto[0] = float(texto[0])
+        texto[1] = float(texto[1])
+        lista_final.append(tuple(texto))
+
+    return lista_final
+
+
+
+
+
+
+def func_archivoyml_tuplas(ruta_yml: str) -> list:
+    '''
+    Lee los archivos yml y devuelve la lista de tuplas
+    '''
+    try:
+        with open(ruta_yml, 'r', encoding='utf-8') as archivo:
+            texto_archivo = archivo.read()
+
+        # Separar el texto por 'data: |' y tomar la primera parte
+        lista_unprocessed = texto_archivo.split('data: |')[1].strip()
+
+        # Separar las líneas del texto
+        lineas = lista_unprocessed.split('\n')
+
+        lista_final = []
+
+        for linea in lineas:
+            # Separar cada línea en dos partes: longitud de onda y índice de refracción
+            partes = linea.strip().split()
+            if len(partes) == 2:
+                # Convertir las partes a números flotantes
+                lambda_i = float(partes[0])
+                ni = float(partes[1])
+                tupla = (lambda_i, ni)
+                lista_final.append(tupla)
+
+        return lista_final
+    except Exception as e:
+        print(f"Error al procesar el archivo {ruta_yml}: {str(e)}")
+        return []
 
 # Ejemplo de uso:
-ruta_archivo_yml = "archivo.yml"
-resultados = procesar_archivo_yml(ruta_archivo_yml)
-for lambda_i, n_i in resultados:
-    print(f"Longitud de onda: {lambda_i}, Índice de refracción: {n_i}")
+ruta_del_archivo_yml_1 = "ruta/del/archivo.yml"
+tuplas = func_archivoyml_tuplas(ruta_del_archivo_yml)
+print(tuplas)
