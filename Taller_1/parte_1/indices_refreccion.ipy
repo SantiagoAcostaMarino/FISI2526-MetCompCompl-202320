@@ -140,7 +140,9 @@ grafica_2 =refraccion_longitud(tupla_NOA1348,"NOA1348")
 
 
 
-
+#Punto 1.5
+def graficas_generales(tupla):
+    return None
 
 
 
