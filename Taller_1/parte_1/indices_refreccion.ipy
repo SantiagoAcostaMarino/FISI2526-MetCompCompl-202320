@@ -54,8 +54,7 @@ def crear_tuplas(ruta):
     else:
         return []
 
-# Ejemplo de uso
-tuplas_2 = crear_tuplas(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Mezclas\Aire.yml")
+
 
 
 #Punto 1.4
@@ -90,8 +89,6 @@ def n_promedio(tupla):
         return respuesta
 
 
-n1 = n_promedio(tuplas_2)
-print (n1)
 
 def desviacion_estandar(tuplas):
     if len(tuplas) < 2:
