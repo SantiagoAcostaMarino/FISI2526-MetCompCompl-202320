@@ -46,7 +46,7 @@ def contenido_logico(contenido):
     return tuplas
 
 # Función principal
-def procesar_archivo_yml(ruta):
+def crear_tuplas(ruta):
     contenido = leer_archivo_yml(ruta)
     if contenido is not None:
         tuplas = contenido_logico(contenido)
@@ -55,7 +55,7 @@ def procesar_archivo_yml(ruta):
         return []
 
 # Ejemplo de uso
-tuplas_2 = procesar_archivo_yml(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Mezclas\Aire.yml")
+tuplas_2 = crear_tuplas(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Mezclas\Aire.yml")
 
 
 #Punto 1.4
@@ -63,9 +63,9 @@ tuplas_2 = procesar_archivo_yml(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Aco
 def formato_grafica(titulo, ejex, ejey):
     plt.rcParams['axes.axisbelow'] = True
 
-    plt.title(titulo, fontsize=15)
-    plt.ylabel(ejey, fontsize=13)
-    plt.xlabel(ejex, fontsize=13)
+    plt.title(titulo, fontsize=10)
+    plt.ylabel(ejey, fontsize=8)
+    plt.xlabel(ejex, fontsize=8)
 
     plt.tick_params(direction='out', length=5, width=0.75, grid_alpha=0.3)
     plt.xticks(rotation=0)
@@ -127,23 +127,25 @@ def refraccion_longitud (tupla, categoria, material):
 
     x = [x[0] for x in tupla]
     y = [x[1] for x in tupla]
+
     plt.plot(x, y, linestyle = "", marker = ".", color='dodgerblue', ms=10, label='Voc') 
     formato_grafica(titulo=titulo, ejex='"Longitud de onda (nm)"', ejey='Índice de refracción')
 
-    plt.show()
+    plt.legend ()
 
-   
-    # Ruta donde se guardará la gráfica
+    # Definimos en que ruta se va a guardar la grafica donde 
     ruta_guardado = os.path.join('C:\\Users\\XIME\\FISI2526-MetCompCompl-202320-Acosta---Campos\\Taller_1\\parte_1\\archivos_yml', categoria, material + ".png")
     
-    plt.savefig(ruta_guardado)
+    plt.savefig(ruta_guardado, format='png') #Salvamos la imagen, es importante salvarla antes de mostrala o se genera un error en el que la imagen guardada esta en blanco
+
+    plt.show()
     
     plt.close()  # Cierra la figura para liberar memoria
 
-tupla_kapton = procesar_archivo_yml(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Plásticos Comerciales\Kapton.yml")
+tupla_kapton = crear_tuplas(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Plásticos Comerciales\Kapton.yml")
 grafica_1 =refraccion_longitud(tupla_kapton, "Plásticos Comerciales", "Kapton")
 
-tupla_NOA1348 = procesar_archivo_yml(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Adhesivos Ópticos\NOA1348.yml")
+tupla_NOA1348 = crear_tuplas(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Adhesivos Ópticos\NOA1348.yml")
 grafica_2 =refraccion_longitud(tupla_NOA1348, "Adhesivos Ópticos", "NOA1348")
 
 
@@ -151,7 +153,22 @@ grafica_2 =refraccion_longitud(tupla_NOA1348, "Adhesivos Ópticos", "NOA1348")
 
 #Punto 1.5
 def graficas_generales(tupla):
-    return None
+    lista_elementos = pd.read_csv('./indices_refraccion.csv')
+    
+    for index, row in lista_elementos.iterrows():
+        nombre = row['Nombre']
+        categoria = row['Categoría']
+        material = row['Material']
+        
+        # Ruta del archivo .yml
+        ruta_yml = './' + categoria + '/' + material + '.yml'
+        
+        # Cargar el archivo .yml y crear la tupla
+        # (Debes implementar la función para cargar y crear la tupla)
+        tupla = cargar_archivo_yml_y_crear_tupla(ruta_yml)
+        
+        # Llamar a la función para graficar y guardar
+        graficar_y_guardar(tupla, nombre, categoria, material)
 
 
 
