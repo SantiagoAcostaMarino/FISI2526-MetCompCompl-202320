@@ -1,5 +1,6 @@
 
 #Importamos las librerias
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -117,10 +118,10 @@ def desviacion_estandar(tuplas):
 
 
 #Funcion de grafica
-def refraccion_longitud (tupla, Nombre):
+def refraccion_longitud (tupla, categoria, material):
     n_prom = n_promedio (tupla)
     desv = desviacion_estandar(tupla)
-    titulo = (str(Nombre)+ "\n" +
+    titulo = (str(material)+ "\n" +
     " n_promedio: " + str(n_prom) + "\n" +
     "desviación estándar: " + str(desv))
 
@@ -131,11 +132,19 @@ def refraccion_longitud (tupla, Nombre):
 
     plt.show()
 
+   
+    # Ruta donde se guardará la gráfica
+    ruta_guardado = os.path.join('C:\\Users\\XIME\\FISI2526-MetCompCompl-202320-Acosta---Campos\\Taller_1\\parte_1\\archivos_yml', categoria, material + ".png")
+    
+    plt.savefig(ruta_guardado)
+    
+    plt.close()  # Cierra la figura para liberar memoria
+
 tupla_kapton = procesar_archivo_yml(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Plásticos Comerciales\Kapton.yml")
-grafica_1 =refraccion_longitud(tupla_kapton,"Kapton")
+grafica_1 =refraccion_longitud(tupla_kapton, "Plásticos Comerciales", "Kapton")
 
 tupla_NOA1348 = procesar_archivo_yml(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Adhesivos Ópticos\NOA1348.yml")
-grafica_2 =refraccion_longitud(tupla_NOA1348,"NOA1348")
+grafica_2 =refraccion_longitud(tupla_NOA1348, "Adhesivos Ópticos", "NOA1348")
 
 
 
