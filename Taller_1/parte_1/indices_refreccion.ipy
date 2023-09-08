@@ -1,187 +1,153 @@
 
-import matplotlib.pyplot as plt
+#Importamos las librerias
 import numpy as np
-import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import matplotlib.patches as mpatches
 
-def func_archivoyml_tuplas_2 (ruta_yml: str) -> list:
-    '''
-     Lee los archivos yml y devuelve la lista de tuplas
-    '''
-    f = open(ruta_yml)
-    texto_archivo = f.read() #text_archivo es un string de todo lo que contiene el archivo
-    f.close()
 
-    # A continuación, note que el texto lo separamos por data: |\n, así como en \nSPECS y - type.
-    # Si bien no todos los archivos tienen estos dos últimos strings de terminación, se pueden incluir
-    # para buscar el caso más generla
-    lista_unprocessed = texto_archivo.split('data: |\n')[1].split('\nSPECS')[0].split('  - type')[0].strip().split('\n        ')
+#Punto 1.3
+
+#Funciones auxiliares:
+def leer_archivo_yml(ruta):
+    """
+    Esta funcion abre un archivo yml para poder leerlo como una cadena de texto.
+    """
+    try:
+        with open(ruta, 'r') as archivo:
+            contenido = archivo.read()
+        return contenido
+    except FileNotFoundError:
+        return None
     
-    # Acá si gustan pueden darle un print a lista_unprocessed para ver el resultado
-    lista_final = []
-
-    for k in lista_unprocessed:
-        texto = k.split(' ')
-        texto[0] = float(texto[0])
-        texto[1] = float(texto[1])
-        lista_final.append(tuple(texto))
-
-    return lista_final
-
-
-
-
-
-
-def func_archivoyml_tuplas(ruta_yml: str) -> list:
-    '''
-    Lee los archivos yml y devuelve la lista de tuplas
-    '''
+def contenido_logico(contenido):
+    """
+    Debido que que existen archivos yml que poseen en sus datos informacion diferente a numero se genera un error al crear las tuplas
+    Esta funcion establece el inicio y el final de la infromacion de los archivos que vamos a usar en las tuplas
+    """
+    tuplas = []
+    inicio = "data: |"
+    fin = "\nSPECS"
+    contenido = contenido.split(inicio)[1].split(fin)[0].strip()
     
-    f = open(ruta_yml)
-    texto_archivo = f.read() #text_archivo es un string de todo lo que contiene el archivo
-    f.close()
-    
-    # Separar el texto por 'data: |' y tomar la primera parte
-    lista_unprocessed = texto_archivo.split('data: |')[1].strip()
-
-    # Separar las líneas del texto
-    lineas = lista_unprocessed.split('\n')
-
-    lista_final = []
-
+    lineas = contenido.split("\n")
     for linea in lineas:
-        # Separar cada línea en dos partes: longitud de onda y índice de refracción
-        partes = linea.strip().split()
-        if len(partes) == 2:
-            # Convertir las partes a números flotantes
-            lambda_i = float(partes[0])
-            ni = float(partes[1])
-            tupla = (lambda_i, ni)
-            lista_final.append(tupla)
-
-    return lista_final
+        valores = linea.split()
+        if len(valores) == 2:
+            try:
+                valor1 = float(valores[0])
+                valor2 = float(valores[1])
+                tuplas.append((valor1, valor2))
+            except ValueError:
+                print(f"Error al convertir valores en la línea: '{linea}'") #Para saber en que linea esta el error o informacion difernete a numeros
     
+    return tuplas
+
+# Función principal
+def procesar_archivo_yml(ruta):
+    contenido = leer_archivo_yml(ruta)
+    if contenido is not None:
+        tuplas = contenido_logico(contenido)
+        return tuplas
+    else:
+        return []
+
+# Ejemplo de uso
+tuplas_2 = procesar_archivo_yml(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Mezclas\Aire.yml")
 
 
-# PUNTO 1 #
+#Punto 1.4
+#Desarollamos un funcion para poder desarollar las graficas de manera mas sencilla
+def formato_grafica(titulo, ejex, ejey):
+    plt.rcParams['axes.axisbelow'] = True
 
-def tuplas_yml(file_path):
-    
-    with open(file_path, 'r') as file:
-        yml_content = file.read()
-        
-        # Encontrar el inicio y fin de la sección de datos
-        start_index = yml_content.find("data: |")
-        end_index = yml_content.find("SPECS", start_index)
-        data_section = yml_content[start_index:end_index].strip()
-        
+    plt.title(titulo, fontsize=15)
+    plt.ylabel(ejey, fontsize=13)
+    plt.xlabel(ejex, fontsize=13)
 
-        # Extraer las tuplas (λi, ni) del texto
-        data_tuples = []
-        
-        data_lines = data_section.split("\n")
-        
-        for line in data_lines[1:]:  # Saltar el primer elemento en blanco
-            parts = line.strip().split()
-            parts_list = list(parts)
-            
-            if len(parts) == 2:
-                wavelength = float(parts_list[0])
-                refractive_index = float(parts_list[1])
-                data_tuples.append((wavelength, refractive_index))
-                
-        return data_tuples
-
-
-
-data_tuples = tuplas_yml(r"C:\Users\rigod\Documents\MetodosI_RigoArias_SebastianQuiroga\archivos_yml\Adhesivos Ópticos\NOA1348.yml")
-
-
-def mean(data_tuples):
-    
-    first_values = [ ]
-    
-    for tuple in data_tuples:
-        
-        first_values.append(tuple[1])
-        
-    return sum(first_values) / len(first_values)
-
-
-def s_deviation(data_tuples):
-    
-    first_values = []
-    
-    for tuple in data_tuples:
-        
-        first_values.append(tuple[0])
-        mean = sum(first_values) / len(first_values)
-        squared_differences = [(x - mean)**2 for x in first_values]
-        variance = sum(squared_differences) / (len(first_values))
-        
-    return np.sqrt(variance)
-
-
-def refractive_index_graph(data_tuples, material):
-    
-    wavelength = [tupla[0] for tupla in data_tuples]
-    refractive_index = [tupla[1] for tupla in data_tuples]
-    refractive_index_mean = mean(data_tuples)
-    refractive_index_s_deviation  = s_deviation(data_tuples)
-    plt.figure(figsize=(10, 8))
-
-    plt.title(f"Indice de refraccion de {material}, n promedio = {refractive_index_mean}, desviacion estandar = {refractive_index_s_deviation} ")
-
-    plt.xlabel("Longitud de onda (nm)")
-    plt.ylabel("Índice de refracción")
-
-    plt.plot(wavelength, refractive_index)
-
+    plt.tick_params(direction='out', length=5, width=0.75, grid_alpha=0.3)
+    plt.xticks(rotation=0)
+    plt.minorticks_on()
+    plt.ylim(None, None)
+    plt.xlim(None, None)
     plt.grid(True)
+    plt.legend(loc=True)
+    plt.tight_layout;
+
+#funcion de n_
+def n_promedio(tupla):
+    
+    n_promedio = [ ] #Creamos una lista para sumar los valores de la tupla
+    
+    for tupla in tupla:
+        
+        n_promedio.append(tupla[1]) #Aqui añadimos los valores de la columna 2 del archivo yml
+        datos = sum(n_promedio)
+        cantidad_datos = len(n_promedio)
+        respuesta =  datos/cantidad_datos
+    return respuesta
+
+
+n1 = n_promedio(tuplas_2)
+print (n1)
+
+def desviacion_estandar(tuplas):
+    if len(tuplas) < 2:
+        return 0  #En caso de poeseer una tupla con menos de 2 elementos
+
+    # Calcular el promedio de los datos
+    datos = []
+    
+    for tupla in tuplas:
+        datos.append(tupla[1]) #Aqui añadimos los valores de la columna 2 del archivo yml
+        respuesta =  n_promedio(tuplas)
+
+        # Calcular la suma de las diferencias al cuadrado
+        suma_diferencias_cuadrado = sum([(x - respuesta)**2 for x in datos])
+        
+        # Calcular la varianza
+        varianza = suma_diferencias_cuadrado/ (len(datos))
+        
+        # Calculamos la desviación estándar sacando la raíz cuadrada de la varianza
+        desviacion_estandar = np.sqrt(varianza)
+
+    return desviacion_estandar
+
+
+
+#Funcion de grafica
+def refraccion_longitud (tupla, Nombre):
+    n_prom = n_promedio (tupla)
+    desv = desviacion_estandar(tupla)
+    titulo = (str(Nombre)+ "\n" +
+    " n_promedio: " + str(n_prom) + "\n" +
+    "desviación estándar: " + str(desv))
+
+    x = [x[0] for x in tupla]
+    y = [x[1] for x in tupla]
+    plt.plot(x, y, linestyle = "", marker = ".", color='dodgerblue', ms=10, label='Voc') 
+    formato_grafica(titulo=titulo, ejex='"Longitud de onda (nm)"', ejey='Índice de refracción')
 
     plt.show()
-    
-print(refractive_index_graph(data_tuples, 'NOA1348'))
+
+tupla_kapton = procesar_archivo_yml(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Plásticos Comerciales\Kapton.yml")
+grafica_1 =refraccion_longitud(tupla_kapton,"Kapton")
+
+tupla_NOA1348 = procesar_archivo_yml(r"C:\Users\XIME\FISI2526-MetCompCompl-202320-Acosta---Campos\Taller_1\parte_1\archivos_yml\Adhesivos Ópticos\NOA1348.yml")
+grafica_2 =refraccion_longitud(tupla_NOA1348,"NOA1348")
 
 
-#def files_names(carpeta):
 
 
 
-#archivos = files_names(r"C:\Users\rigod\Documents\MetodosI_RigoArias_SebastianQuiroga\archivos_yml")
 
-def save_graph(data_tuples, material, dir_path):
-    
-    wavelength = [tupla[0] for tupla in data_tuples]
-    refractive_index = [tupla[1] for tupla in data_tuples]
-    refractive_index_mean = mean(data_tuples)
-    refractive_index_s_deviation = stdev(data_tuples)
 
-    plt.figure(figsize=(10, 8))
 
-    plt.title(f"Índice de refracción de {material}, n promedio = {refractive_index_mean}, desviación estándar = {refractive_index_s_deviation}")
 
-    plt.xlabel("Longitud de onda (nm)")
-    plt.ylabel("Índice de refracción")
 
-    plt.plot(wavelength, refractive_index)
 
-    plt.grid(True)
 
-    plt.savefig(os.path.join(dir_path, f"{material}.png"))
 
-def main(pathh):
-    # Obtener la lista de archivos
-    files = files_names(pathh)
 
-    # Procesar cada archivo
-    for file in files:
-        
-        # Obtener los datos del archivo
-        data_tuples = tuplas_yml(os.path.join(pathh, file))
 
-        # Guardar la gráfica
-        save_graph(data_tuples, file, os.path.join(pathh, os.path.dirname(file)))
-
-main(r"C:\Users\rigod\Documents\MetodosI_RigoArias_SebastianQuiroga\archivos_yml")
-# PUNTO 2 #
